@@ -1,0 +1,5 @@
+logs/
+dist/data/latest.json
+*.tmp
+*.bak
+Thumbs.db

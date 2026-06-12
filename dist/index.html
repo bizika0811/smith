@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>美国-伊朗局势日报</title>
+  <style>
+    :root {
+      --bg: #f4efe5;
+      --panel: rgba(255, 252, 245, 0.9);
+      --ink: #182028;
+      --muted: #5f6a72;
+      --accent: #b33a1b;
+      --accent-2: #115e59;
+      --border: rgba(24, 32, 40, 0.12);
+      --shadow: 0 20px 50px rgba(24, 32, 40, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(179, 58, 27, 0.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(17, 94, 89, 0.16), transparent 32%),
+        linear-gradient(180deg, #efe6d6 0%, var(--bg) 48%, #f7f2ea 100%);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 36px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .hero-card, .meta-card, .group, .source-card, .analysis-card, .analysis-side {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .hero-card {
+      padding: 28px;
+      border-radius: 28px;
+    }
+
+    .meta-card {
+      padding: 24px;
+      border-radius: 24px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 10px 0 14px;
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: 0.96;
+      max-width: 10ch;
+    }
+
+    .lead {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    .meta-line {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(24, 32, 40, 0.04);
+    }
+
+    .meta-line strong {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .group {
+      border-radius: 30px;
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+
+    .analysis {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .analysis-card, .analysis-side {
+      border-radius: 26px;
+      padding: 24px;
+    }
+
+    .analysis-card h2, .analysis-side h3 {
+      margin: 0 0 12px;
+    }
+
+    .brief-block + .brief-block {
+      margin-top: 18px;
+    }
+
+    .brief-title {
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 6px 12px;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .analysis-overview {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .analysis-list {
+      list-style: disc;
+      padding-left: 20px;
+      margin: 0;
+      color: var(--ink);
+      display: grid;
+      gap: 10px;
+    }
+
+    .analysis-list li {
+      border: 0;
+      padding: 0;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .theme-box {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(24, 32, 40, 0.05);
+    }
+
+    .theme-box strong {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .headlines {
+      display: grid;
+      gap: 10px;
+    }
+
+    .headline-link {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .group-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .group h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .group small {
+      color: var(--muted);
+    }
+
+    .sources {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .source-card {
+      border-radius: 22px;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .source-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .source-top a {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 19px;
+    }
+
+    .badge {
+      font-size: 12px;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      white-space: nowrap;
+    }
+
+    .badge.error {
+      background: var(--accent);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    li {
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    li:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .item-link {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .summary {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .time {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .error-text {
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .analysis {
+        grid-template-columns: 1fr;
+      }
+
+      .wrap {
+        width: min(100vw - 18px, 1180px);
+        padding-top: 18px;
+      }
+
+      .group {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+  <script id="payload" type="application/json">{"generatedAt":"2026-06-12T06:23:45.451Z","results":[{"id":"npr-world","name":"NPR","group":"主流媒体","homepage":"https://www.npr.org/sections/world/","rss":"https://feeds.npr.org/1004/rss.xml","limit":8,"status":"ok","itemCount":1,"items":[{"title":"Trump now says a peace deal will be announced &apos;soon,&apos; cancels further strikes","link":"https://www.npr.org/2026/06/11/nx-s1-5854970/trump-iran-peace-deal-cancel-strikes","summary":"President Trump had previously been amping up his rhetoric against Iran.","publishedAt":"2026-06-11T20:04:52.000Z","source":"NPR"}]},{"id":"france24","name":"France 24","group":"主流媒体","homepage":"https://www.france24.com/en/","rss":"https://www.france24.com/en/rss","limit":8,"status":"ok","itemCount":3,"items":[{"title":"Middle East live: US forces shoot down Iranian drones near Strait of Hormuz","link":"https://www.france24.com/en/middle-east/20260612-middle-east-live-us-forces-shoot-down-iranian-drones-near-strait-of-hormuz","summary":"US forces shot down two Iranian one-way attack drones as Tehran appeared to attempt to strike commercial ships transiting the Strait of Hormuz, hours after US President Donald T...","publishedAt":"2026-06-12T02:23:20.000Z","source":"France 24"},{"title":"Trump says Iran peace deal is near after threatening new strikes","link":"https://www.france24.com/en/middle-east/20260611-trump-says-iran-peace-deal-is-near-after-threatening-new-strikes","summary":"US President Donald Trump said Thursday he had halted plans for new military strikes on Iran, claiming negotiators were close to extending a fragile ceasefire. Hours before, he...","publishedAt":"2026-06-11T21:47:25.000Z","source":"France 24"},{"title":"Trump touts Iran deal: \"some people's response to this will be 'the boy who cried wolf'\"","link":"https://www.france24.com/en/trump-touts-iran-deal-some-people-s-response-to-this-will-be-the-boy-who-cried-wolf","summary":"US President Donald Trump on Thursday announced a \"great settlement\" with Iran to end the Middle East war, saying he expected a deal to be signed in Europe in the coming days. T...","publishedAt":"2026-06-11T20:27:57.000Z","source":"France 24"}]},{"id":"carnegie","name":"Carnegie Endowment","group":"智库/政策期刊","homepage":"https://carnegieendowment.org/","rss":"https://carnegieendowment.org/rss/allContent","limit":8,"status":"ok","itemCount":0,"items":[]},{"id":"crisis-group","name":"International Crisis Group","group":"智库/政策期刊","homepage":"https://www.crisisgroup.org/","rss":"https://www.crisisgroup.org/rss.xml","limit":8,"status":"ok","itemCount":8,"items":[{"title":"Hormuz 5 June 2026 #1","link":"https://www.crisisgroup.org/content/hormuz-5-june-2026-1","summary":"Hormuz 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:52 Strait of Hormuz Fri, 06/05/2026 - 12:00 5 June 2026 U.S. Indo-Pacific Command (INDOPACOM) reported that “U.S. forces carri...","publishedAt":"2026-06-05T15:52:12.000Z","source":"International Crisis Group"},{"title":"Washington 5 June 2026 #2","link":"https://www.crisisgroup.org/content/washington-5-june-2026-2","summary":"Washington 5 June 2026 #2 lalasor Fri, 06/05/2026 - 17:53 Washington Fri, 06/05/2026 - 12:00 5 June 2026 The U.S. announced sanctions against \"a network of individuals, entities...","publishedAt":"2026-06-05T15:53:07.000Z","source":"International Crisis Group"},{"title":"Tehran 5 June 2026 #1","link":"https://www.crisisgroup.org/content/tehran-5-june-2026-1","summary":"Tehran 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:50 Tehran Fri, 06/05/2026 - 12:00 5 June 2026 U.S. Indo-Pacific Command (INDOPACOM) reported that “U.S. forces carried out a m...","publishedAt":"2026-06-05T15:50:10.000Z","source":"International Crisis Group"},{"title":"Washington 5 June 2026 #1","link":"https://www.crisisgroup.org/content/washington-5-june-2026-1","summary":"Washington 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:49 Washington Fri, 06/05/2026 - 12:00 5 June 2026 U.S. Indo-Pacific Command (INDOPACOM) reported that “U.S. forces carried...","publishedAt":"2026-06-05T15:49:23.000Z","source":"International Crisis Group"},{"title":"Lebanon 5 June 2026 #1","link":"https://www.crisisgroup.org/content/lebanon-5-june-2026-1","summary":"Lebanon 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:47 Lebanon Fri, 06/05/2026 - 12:00 5 June 2026 Hizbollah reported conducting approximately 20 attacks on Israeli troops in so...","publishedAt":"2026-06-05T15:47:48.000Z","source":"International Crisis Group"},{"title":"Israel 5 June 2026 #1","link":"https://www.crisisgroup.org/content/israel-5-june-2026-1","summary":"Israel 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:46 Israel Fri, 06/05/2026 - 12:00 5 June 2026 Hizbollah reported conducting approximately 20 attacks on Israeli troops in sout...","publishedAt":"2026-06-05T15:46:40.000Z","source":"International Crisis Group"},{"title":"Lebanon 3 June 2026 #2","link":"https://www.crisisgroup.org/content/lebanon-3-june-2026-2","summary":"Lebanon 3 June 2026 #2 lalasor Thu, 06/04/2026 - 18:13 Lebanon Thu, 06/04/2026 - 12:00 3 June 2026 Foreign Minister Abbas Araghchi stated that \"there is currently no formal proc...","publishedAt":"2026-06-04T16:13:21.000Z","source":"International Crisis Group"},{"title":"Tehran 3 June 2026 #3","link":"https://www.crisisgroup.org/content/tehran-3-june-2026-3","summary":"Tehran 3 June 2026 #3 lalasor Thu, 06/04/2026 - 18:12 Tehran Thu, 06/04/2026 - 12:00 3 June 2026 Foreign Minister Abbas Araghchi stated that \"there is currently no formal proces...","publishedAt":"2026-06-04T16:12:14.000Z","source":"International Crisis Group"}]},{"id":"responsible-statecraft","name":"Responsible Statecraft","group":"智库/政策期刊","homepage":"https://responsiblestatecraft.org/","rss":"https://responsiblestatecraft.org/feed/","limit":8,"status":"ok","itemCount":8,"items":[{"title":"Trump's art of the deal meets Iran's long memory of foreign exploitation","link":"https://responsiblestatecraft.org/iran-deal-negotiations/","summary":"As the government’s standing plummets to an all-time low due to a reckless disregard for the welfare of its people, mass protests sweep across major Iran’s cities, including Shi...","publishedAt":"2026-06-04T04:05:01.000Z","source":"Responsible Statecraft"},{"title":"Oman walks a tightrope amid Trump's threats to 'blow them up'","link":"https://responsiblestatecraft.org/iran-war-oman/","summary":"Up until last week, it would have been unthinkable that a partner and mediating stalwart like Oman would be a target in Washington. Yet, here we are. President Donald Trump, in...","publishedAt":"2026-06-04T04:05:01.000Z","source":"Responsible Statecraft"},{"title":"'Break their will!' Republicans want Trump to fight Iran, not make deal","link":"https://responsiblestatecraft.org/iran-war-deal/","summary":"As signals mounted early Thursday that President Trump planned to escalate with Iran, two congressional Republicans urged him to abandon what they said are fruitless negotiation...","publishedAt":"2026-06-11T20:23:33.000Z","source":"Responsible Statecraft"},{"title":"Trump is losing control of the Iran war","link":"https://responsiblestatecraft.org/iran-war-escalation/","summary":"Amid a rapid escalation between Israel and Iran, Yemen’s Houthis have rejoined the Iran war, launching a volley of missiles at Israel and pledging to implement a “complete and t...","publishedAt":"2026-06-08T12:11:04.000Z","source":"Responsible Statecraft"},{"title":"Lawmakers pump brakes on military AI — sort of","link":"https://responsiblestatecraft.org/congress-ai-military/","summary":"AI domination on battlefields from Ukraine to the Middle East is fueling fears that waning human oversight is ushering in a more perilous future of warfare. As the Pentagon race...","publishedAt":"2026-06-08T04:05:02.000Z","source":"Responsible Statecraft"},{"title":"Finally: House votes to end Trump's war with Iran","link":"https://responsiblestatecraft.org/iran-war-powers-passes/","summary":"The House of Representatives successfully passed a resolution Wednesday that would direct President Donald Trump to remove U.S. armed forces from hostilities with Iran absent co...","publishedAt":"2026-06-03T22:41:39.000Z","source":"Responsible Statecraft"},{"title":"Senate wants to force US to share sensitive intel with Israel","link":"https://responsiblestatecraft.org/us-intelligence-israel/","summary":"Buried deep inside a 192-page intelligence authorization bill is Section 622, titled “United States-Israel Intelligence Sharing Enhancement.” It would require the president, act...","publishedAt":"2026-06-10T04:05:01.000Z","source":"Responsible Statecraft"},{"title":"Trump vows to take Kharg Island despite risk of ‘suicide mission’","link":"https://responsiblestatecraft.org/trump-kharg-island/","summary":"President Donald Trump threatened to invade Iran’s Kharg Island in order to seize Iranian oil infrastructure there. “At some point in the not too distant future, we will be taki...","publishedAt":"2026-06-11T14:57:15.000Z","source":"Responsible Statecraft"}]},{"id":"ap-direct","name":"AP News","group":"主流媒体","homepage":"https://apnews.com/","rss":"https://apnews.com/hub/middle-east/rss.xml","limit":8,"status":"ok","itemCount":0,"items":[]}],"groups":[{"group":"主流媒体","entries":[{"id":"npr-world","name":"NPR","group":"主流媒体","homepage":"https://www.npr.org/sections/world/","rss":"https://feeds.npr.org/1004/rss.xml","limit":8,"status":"ok","itemCount":1,"items":[{"title":"Trump now says a peace deal will be announced &apos;soon,&apos; cancels further strikes","link":"https://www.npr.org/2026/06/11/nx-s1-5854970/trump-iran-peace-deal-cancel-strikes","summary":"President Trump had previously been amping up his rhetoric against Iran.","publishedAt":"2026-06-11T20:04:52.000Z","source":"NPR"}]},{"id":"france24","name":"France 24","group":"主流媒体","homepage":"https://www.france24.com/en/","rss":"https://www.france24.com/en/rss","limit":8,"status":"ok","itemCount":3,"items":[{"title":"Middle East live: US forces shoot down Iranian drones near Strait of Hormuz","link":"https://www.france24.com/en/middle-east/20260612-middle-east-live-us-forces-shoot-down-iranian-drones-near-strait-of-hormuz","summary":"US forces shot down two Iranian one-way attack drones as Tehran appeared to attempt to strike commercial ships transiting the Strait of Hormuz, hours after US President Donald T...","publishedAt":"2026-06-12T02:23:20.000Z","source":"France 24"},{"title":"Trump says Iran peace deal is near after threatening new strikes","link":"https://www.france24.com/en/middle-east/20260611-trump-says-iran-peace-deal-is-near-after-threatening-new-strikes","summary":"US President Donald Trump said Thursday he had halted plans for new military strikes on Iran, claiming negotiators were close to extending a fragile ceasefire. Hours before, he...","publishedAt":"2026-06-11T21:47:25.000Z","source":"France 24"},{"title":"Trump touts Iran deal: \"some people's response to this will be 'the boy who cried wolf'\"","link":"https://www.france24.com/en/trump-touts-iran-deal-some-people-s-response-to-this-will-be-the-boy-who-cried-wolf","summary":"US President Donald Trump on Thursday announced a \"great settlement\" with Iran to end the Middle East war, saying he expected a deal to be signed in Europe in the coming days. T...","publishedAt":"2026-06-11T20:27:57.000Z","source":"France 24"}]},{"id":"ap-direct","name":"AP News","group":"主流媒体","homepage":"https://apnews.com/","rss":"https://apnews.com/hub/middle-east/rss.xml","limit":8,"status":"ok","itemCount":0,"items":[]}]},{"group":"智库/政策期刊","entries":[{"id":"carnegie","name":"Carnegie Endowment","group":"智库/政策期刊","homepage":"https://carnegieendowment.org/","rss":"https://carnegieendowment.org/rss/allContent","limit":8,"status":"ok","itemCount":0,"items":[]},{"id":"crisis-group","name":"International Crisis Group","group":"智库/政策期刊","homepage":"https://www.crisisgroup.org/","rss":"https://www.crisisgroup.org/rss.xml","limit":8,"status":"ok","itemCount":8,"items":[{"title":"Hormuz 5 June 2026 #1","link":"https://www.crisisgroup.org/content/hormuz-5-june-2026-1","summary":"Hormuz 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:52 Strait of Hormuz Fri, 06/05/2026 - 12:00 5 June 2026 U.S. Indo-Pacific Command (INDOPACOM) reported that “U.S. forces carri...","publishedAt":"2026-06-05T15:52:12.000Z","source":"International Crisis Group"},{"title":"Washington 5 June 2026 #2","link":"https://www.crisisgroup.org/content/washington-5-june-2026-2","summary":"Washington 5 June 2026 #2 lalasor Fri, 06/05/2026 - 17:53 Washington Fri, 06/05/2026 - 12:00 5 June 2026 The U.S. announced sanctions against \"a network of individuals, entities...","publishedAt":"2026-06-05T15:53:07.000Z","source":"International Crisis Group"},{"title":"Tehran 5 June 2026 #1","link":"https://www.crisisgroup.org/content/tehran-5-june-2026-1","summary":"Tehran 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:50 Tehran Fri, 06/05/2026 - 12:00 5 June 2026 U.S. Indo-Pacific Command (INDOPACOM) reported that “U.S. forces carried out a m...","publishedAt":"2026-06-05T15:50:10.000Z","source":"International Crisis Group"},{"title":"Washington 5 June 2026 #1","link":"https://www.crisisgroup.org/content/washington-5-june-2026-1","summary":"Washington 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:49 Washington Fri, 06/05/2026 - 12:00 5 June 2026 U.S. Indo-Pacific Command (INDOPACOM) reported that “U.S. forces carried...","publishedAt":"2026-06-05T15:49:23.000Z","source":"International Crisis Group"},{"title":"Lebanon 5 June 2026 #1","link":"https://www.crisisgroup.org/content/lebanon-5-june-2026-1","summary":"Lebanon 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:47 Lebanon Fri, 06/05/2026 - 12:00 5 June 2026 Hizbollah reported conducting approximately 20 attacks on Israeli troops in so...","publishedAt":"2026-06-05T15:47:48.000Z","source":"International Crisis Group"},{"title":"Israel 5 June 2026 #1","link":"https://www.crisisgroup.org/content/israel-5-june-2026-1","summary":"Israel 5 June 2026 #1 lalasor Fri, 06/05/2026 - 17:46 Israel Fri, 06/05/2026 - 12:00 5 June 2026 Hizbollah reported conducting approximately 20 attacks on Israeli troops in sout...","publishedAt":"2026-06-05T15:46:40.000Z","source":"International Crisis Group"},{"title":"Lebanon 3 June 2026 #2","link":"https://www.crisisgroup.org/content/lebanon-3-june-2026-2","summary":"Lebanon 3 June 2026 #2 lalasor Thu, 06/04/2026 - 18:13 Lebanon Thu, 06/04/2026 - 12:00 3 June 2026 Foreign Minister Abbas Araghchi stated that \"there is currently no formal proc...","publishedAt":"2026-06-04T16:13:21.000Z","source":"International Crisis Group"},{"title":"Tehran 3 June 2026 #3","link":"https://www.crisisgroup.org/content/tehran-3-june-2026-3","summary":"Tehran 3 June 2026 #3 lalasor Thu, 06/04/2026 - 18:12 Tehran Thu, 06/04/2026 - 12:00 3 June 2026 Foreign Minister Abbas Araghchi stated that \"there is currently no formal proces...","publishedAt":"2026-06-04T16:12:14.000Z","source":"International Crisis Group"}]},{"id":"responsible-statecraft","name":"Responsible Statecraft","group":"智库/政策期刊","homepage":"https://responsiblestatecraft.org/","rss":"https://responsiblestatecraft.org/feed/","limit":8,"status":"ok","itemCount":8,"items":[{"title":"Trump's art of the deal meets Iran's long memory of foreign exploitation","link":"https://responsiblestatecraft.org/iran-deal-negotiations/","summary":"As the government’s standing plummets to an all-time low due to a reckless disregard for the welfare of its people, mass protests sweep across major Iran’s cities, including Shi...","publishedAt":"2026-06-04T04:05:01.000Z","source":"Responsible Statecraft"},{"title":"Oman walks a tightrope amid Trump's threats to 'blow them up'","link":"https://responsiblestatecraft.org/iran-war-oman/","summary":"Up until last week, it would have been unthinkable that a partner and mediating stalwart like Oman would be a target in Washington. Yet, here we are. President Donald Trump, in...","publishedAt":"2026-06-04T04:05:01.000Z","source":"Responsible Statecraft"},{"title":"'Break their will!' Republicans want Trump to fight Iran, not make deal","link":"https://responsiblestatecraft.org/iran-war-deal/","summary":"As signals mounted early Thursday that President Trump planned to escalate with Iran, two congressional Republicans urged him to abandon what they said are fruitless negotiation...","publishedAt":"2026-06-11T20:23:33.000Z","source":"Responsible Statecraft"},{"title":"Trump is losing control of the Iran war","link":"https://responsiblestatecraft.org/iran-war-escalation/","summary":"Amid a rapid escalation between Israel and Iran, Yemen’s Houthis have rejoined the Iran war, launching a volley of missiles at Israel and pledging to implement a “complete and t...","publishedAt":"2026-06-08T12:11:04.000Z","source":"Responsible Statecraft"},{"title":"Lawmakers pump brakes on military AI — sort of","link":"https://responsiblestatecraft.org/congress-ai-military/","summary":"AI domination on battlefields from Ukraine to the Middle East is fueling fears that waning human oversight is ushering in a more perilous future of warfare. As the Pentagon race...","publishedAt":"2026-06-08T04:05:02.000Z","source":"Responsible Statecraft"},{"title":"Finally: House votes to end Trump's war with Iran","link":"https://responsiblestatecraft.org/iran-war-powers-passes/","summary":"The House of Representatives successfully passed a resolution Wednesday that would direct President Donald Trump to remove U.S. armed forces from hostilities with Iran absent co...","publishedAt":"2026-06-03T22:41:39.000Z","source":"Responsible Statecraft"},{"title":"Senate wants to force US to share sensitive intel with Israel","link":"https://responsiblestatecraft.org/us-intelligence-israel/","summary":"Buried deep inside a 192-page intelligence authorization bill is Section 622, titled “United States-Israel Intelligence Sharing Enhancement.” It would require the president, act...","publishedAt":"2026-06-10T04:05:01.000Z","source":"Responsible Statecraft"},{"title":"Trump vows to take Kharg Island despite risk of ‘suicide mission’","link":"https://responsiblestatecraft.org/trump-kharg-island/","summary":"President Donald Trump threatened to invade Iran’s Kharg Island in order to seize Iranian oil infrastructure there. “At some point in the not too distant future, we will be taki...","publishedAt":"2026-06-11T14:57:15.000Z","source":"Responsible Statecraft"}]}]}],"analysis":{"generatedAt":"2026-06-12T06:23:45.454Z","status":{"key":"escalating","label":"升级中","color":"var(--accent)","text":"军事与海上风险信号多于缓和信号，短期内再度失控的概率偏高。"},"themes":{"military":13,"diplomacy":5,"shipping":3,"sanctions":1,"domestic":4},"bullets":["军事信号最强，当前抓取到 13 条与空袭、打击、无人机或直接交火相关的内容。","外交线仍在推进，抓取到 5 条与谈判、停火、协议或“接近达成”相关的内容。","霍尔木兹海峡与航运风险仍是关键观察点，相关条目 3 条。","美国国内政治约束在上升，涉及国会、议员或战争授权的条目 4 条。"],"overview":"最近一轮报道集中在 6月12日 10:23 前后。 当前有 4 个来源给出相关内容，主要包括 NPR、France 24、International Crisis Group、Responsible Statecraft。 军事与海上风险信号多于缓和信号，短期内再度失控的概率偏高。","brief":{"conclusions":["军事压力仍是主线。最近报道显示，美伊相关打击、无人机或直接交火信息仍在累积，最新高相关报道集中在 6月12日 10:23 前后。","外交窗口并未关闭。围绕停火、协议、谈判或“接近达成”的消息仍在出现，说明双方并未完全放弃政治解决。","霍尔木兹海峡与商船安全仍是最值得盯防的外溢风险点，任何航运事件都可能迅速推高油价与地区紧张度。"],"risks":["若再出现美军打击、伊朗无人机/导弹袭扰或代理人攻击，局势可能从脆弱僵持迅速转向新一轮升级。","霍尔木兹海峡若出现商船受扰、封锁威胁或保险成本飙升，市场层面的连锁反应会先于外交结果体现。","美国国内政治约束在上升，白宫、国会和鹰派力量之间的分歧可能让政策信号反复摇摆。"],"watchpoints":["是否出现正式签署或公开确认的停火/协议文本，而不只是“接近达成”的口头表态。","霍尔木兹海峡是否再出现商船遇袭、航线中断、护航升级或油价异常跳升。","美国官方是否宣布新的制裁、增兵、撤侨或国会层面的战争授权动作。"]},"headlines":[{"title":"Middle East live: US forces shoot down Iranian drones near Strait of Hormuz","link":"https://www.france24.com/en/middle-east/20260612-middle-east-live-us-forces-shoot-down-iranian-drones-near-strait-of-hormuz","source":"France 24","publishedAt":"2026-06-12T02:23:20.000Z"},{"title":"Trump says Iran peace deal is near after threatening new strikes","link":"https://www.france24.com/en/middle-east/20260611-trump-says-iran-peace-deal-is-near-after-threatening-new-strikes","source":"France 24","publishedAt":"2026-06-11T21:47:25.000Z"},{"title":"Trump touts Iran deal: \"some people's response to this will be 'the boy who cried wolf'\"","link":"https://www.france24.com/en/trump-touts-iran-deal-some-people-s-response-to-this-will-be-the-boy-who-cried-wolf","source":"France 24","publishedAt":"2026-06-11T20:27:57.000Z"},{"title":"'Break their will!' Republicans want Trump to fight Iran, not make deal","link":"https://responsiblestatecraft.org/iran-war-deal/","source":"Responsible Statecraft","publishedAt":"2026-06-11T20:23:33.000Z"},{"title":"Trump now says a peace deal will be announced &apos;soon,&apos; cancels further strikes","link":"https://www.npr.org/2026/06/11/nx-s1-5854970/trump-iran-peace-deal-cancel-strikes","source":"NPR","publishedAt":"2026-06-11T20:04:52.000Z"}]}}</script>
+  <script>
+    const payload = JSON.parse(document.getElementById("payload").textContent);
+    const app = document.getElementById("app");
+
+    const dateFormat = new Intl.DateTimeFormat("zh-CN", {
+      dateStyle: "full",
+      timeStyle: "short",
+      timeZone: "Asia/Shanghai"
+    });
+
+    const humanDate = (value) => value ? dateFormat.format(new Date(value)) : "时间未知";
+
+    const totalItems = payload.results.reduce((sum, source) => sum + source.itemCount, 0);
+    const healthy = payload.results.filter((source) => source.status === "ok").length;
+    const statusColor = payload.analysis.status.color;
+
+    app.innerHTML = `
+      <section class="hero">
+        <article class="hero-card">
+          <div class="eyebrow">Daily Situation Watch</div>
+          <h1>美国-伊朗局势 每日媒体与智库简报</h1>
+          <p class="lead">聚合世界主流媒体与政策研究机构关于美国、伊朗、制裁、军事行动、霍尔木兹海峡与核谈判的最新报道。页面由本地脚本每日自动更新。</p>
+        </article>
+        <aside class="meta-card">
+          <div class="meta-line">
+            <strong>最后更新</strong>
+            <span>${humanDate(payload.generatedAt)}</span>
+          </div>
+          <div class="meta-line">
+            <strong>本次抓取</strong>
+            <span>${payload.results.length} 个来源 / ${healthy} 个成功 / ${totalItems} 条相关内容</span>
+          </div>
+          <div class="meta-line">
+            <strong>更新规则</strong>
+            <span>每日 10:00 运行抓取脚本并重建页面</span>
+          </div>
+        </aside>
+      </section>
+      <section class="analysis">
+        <article class="analysis-card">
+          <div class="status-pill" style="background:${statusColor}">局势判断：${payload.analysis.status.label}</div>
+          <h2>中文简报</h2>
+          <p class="analysis-overview">${payload.analysis.overview}</p>
+          <section class="brief-block">
+            <h3 class="brief-title">今日三点结论</h3>
+            <ul class="analysis-list">
+              ${payload.analysis.brief.conclusions.map((item) => '<li>' + item + '</li>').join("")}
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3 class="brief-title">风险提示</h3>
+            <ul class="analysis-list">
+              ${payload.analysis.brief.risks.map((item) => '<li>' + item + '</li>').join("")}
+            </ul>
+          </section>
+          <section class="brief-block">
+            <h3 class="brief-title">后续观察点</h3>
+            <ul class="analysis-list">
+              ${payload.analysis.brief.watchpoints.map((item) => '<li>' + item + '</li>').join("")}
+            </ul>
+          </section>
+        </article>
+        <aside class="analysis-side">
+          <h3>观察重点</h3>
+          <div class="theme-grid">
+            <div class="theme-box"><strong>${payload.analysis.themes.military}</strong><span>军事升级条目</span></div>
+            <div class="theme-box"><strong>${payload.analysis.themes.diplomacy}</strong><span>谈判缓和条目</span></div>
+            <div class="theme-box"><strong>${payload.analysis.themes.shipping}</strong><span>霍尔木兹/航运条目</span></div>
+            <div class="theme-box"><strong>${payload.analysis.themes.domestic}</strong><span>美国国内政治条目</span></div>
+          </div>
+          <div class="headlines">
+            ${payload.analysis.headlines.map((item) => '<div><a class="headline-link" href="' + item.link + '" target="_blank" rel="noreferrer">' + item.title + '</a><div class="time">' + item.source + ' · ' + humanDate(item.publishedAt) + '</div></div>').join("")}
+          </div>
+        </aside>
+      </section>
+      ${payload.groups.map((group) => `
+        <section class="group">
+          <div class="group-head">
+            <h2>${group.group}</h2>
+            <small>${group.entries.length} 个来源</small>
+          </div>
+          <div class="sources">
+            ${group.entries.map((source) => `
+              <article class="source-card">
+                <div class="source-top">
+                  <a href="${source.homepage}" target="_blank" rel="noreferrer">${source.name}</a>
+                  <span class="badge ${source.status === "error" ? "error" : ""}">${source.status === "ok" ? source.itemCount + " 条" : "抓取失败"}</span>
+                </div>
+                ${source.status === "ok" ? `
+                  <ul>
+                    ${source.items.length ? source.items.map((item) => `
+                      <li>
+                        <a class="item-link" href="${item.link}" target="_blank" rel="noreferrer">${item.title}</a>
+                        <p class="summary">${item.summary}</p>
+                        <div class="time">${humanDate(item.publishedAt)}</div>
+                      </li>
+                    `).join("") : '<li><div class="summary">本次抓取成功，但未筛到与美国-伊朗局势直接相关的条目。</div></li>'}
+                  </ul>
+                ` : `<div class="error-text">${source.error}</div>`}
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `).join("")}
+      <div class="footer">
+        数据来源：各机构公开 RSS/Feed。相关性依据标题与摘要关键词过滤，适合作为每日情报看板，不替代人工核验。
+      </div>
+    `;
+  </script>
+</body>
+</html>

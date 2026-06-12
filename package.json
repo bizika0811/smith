@@ -1,0 +1,10 @@
+{
+  "name": "us-iran-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily monitor page for major media and think tank reporting on US-Iran developments.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "schedule": "powershell -ExecutionPolicy Bypass -File scripts/register-task.ps1"
+  }
+}

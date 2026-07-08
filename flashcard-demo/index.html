@@ -1,0 +1,2067 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flashcard SRS Demo</title>
+  <meta name="description" content="Standalone flashcard study app with SRS queue, keyboard shortcuts, import, persistence, and HTML export.">
+  <style>
+    :root {
+      --bg: #f3efe7;
+      --bg-strong: #fbf7ef;
+      --panel: rgba(255, 251, 243, 0.88);
+      --panel-strong: #fffdf8;
+      --ink: #1f2933;
+      --muted: #6f7b85;
+      --line: rgba(31, 41, 51, 0.12);
+      --shadow: 0 24px 60px rgba(31, 41, 51, 0.14);
+      --brand: #2e6f95;
+      --brand-strong: #184d70;
+      --accent: #d88c48;
+      --again: #d95b5b;
+      --hard: #dc8b2f;
+      --good: #3f7fdb;
+      --easy: #4d9d53;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: "Avenir Next", "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(216, 140, 72, 0.24), transparent 28%),
+        radial-gradient(circle at top right, rgba(46, 111, 149, 0.18), transparent 24%),
+        radial-gradient(circle at bottom center, rgba(77, 157, 83, 0.14), transparent 28%),
+        linear-gradient(180deg, #fff8ee 0%, #f3efe7 54%, #ebe7df 100%);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1360px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 22px 0 40px;
+    }
+
+    .masthead {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-mark {
+      width: 64px;
+      height: 64px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 34% 34%, #fff1c4 0%, #f7c56a 34%, transparent 35%),
+        linear-gradient(180deg, #6ea6c8 0%, #2e6f95 100%);
+      box-shadow: var(--shadow);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .brand-mark::before {
+      width: 24px;
+      height: 30px;
+      left: 18px;
+      top: 16px;
+      border-radius: 8px 8px 4px 4px;
+    }
+
+    .brand-mark::after {
+      width: 14px;
+      height: 3px;
+      left: 25px;
+      top: 27px;
+      border-radius: 999px;
+      box-shadow: 0 8px 0 rgba(255, 255, 255, 0.92);
+    }
+
+    .brand-copy h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 0.96;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-copy p {
+      margin: 8px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ghost-btn,
+    .solid-btn,
+    .rating-btn,
+    .mini-btn,
+    .deck-item,
+    .card-shell {
+      transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+    }
+
+    .ghost-btn,
+    .solid-btn,
+    .mini-btn {
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+
+    .ghost-btn {
+      background: rgba(255, 255, 255, 0.56);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+
+    .solid-btn {
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(24, 77, 112, 0.22);
+    }
+
+    .ghost-btn:hover,
+    .solid-btn:hover,
+    .mini-btn:hover,
+    .deck-item:hover,
+    .card-shell:hover {
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(310px, 360px) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .sidebar {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.48);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+
+    .section h2,
+    .section h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .section p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .section + .section {
+      margin-top: 0;
+    }
+
+    .badge-row,
+    .stat-row,
+    .deck-list,
+    .actions-grid,
+    .session-actions,
+    .rating-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .badge-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .pill {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+    }
+
+    .pill strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .pill span {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .deck-list {
+      margin-top: 12px;
+    }
+
+    .deck-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      text-align: left;
+    }
+
+    .deck-item.is-selected {
+      border-color: rgba(46, 111, 149, 0.34);
+      box-shadow: 0 14px 26px rgba(46, 111, 149, 0.12);
+      background: rgba(238, 248, 255, 0.88);
+    }
+
+    .deck-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 6px;
+      flex: 0 0 auto;
+    }
+
+    .deck-item.is-selected .deck-dot {
+      background: var(--brand);
+    }
+
+    .deck-copy strong,
+    .summary-card strong,
+    .stat-box strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .deck-copy span,
+    .summary-card span,
+    .stat-box span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .import-title,
+    .field-label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--brand-strong);
+    }
+
+    .text-field,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--ink);
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    .text-field:focus,
+    .textarea:focus,
+    .select:focus {
+      border-color: rgba(46, 111, 149, 0.36);
+      box-shadow: 0 0 0 4px rgba(46, 111, 149, 0.12);
+    }
+
+    .textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .actions-grid,
+    .session-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .summary-card,
+    .stat-box {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .workspace {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+
+    .progress-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1 1 260px;
+      min-width: 220px;
+    }
+
+    .progress-rail {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(31, 41, 51, 0.08);
+      overflow: hidden;
+      flex: 1 1 auto;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--brand) 55%, #4d9d53 100%);
+      width: 0;
+    }
+
+    .status-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .status-chip {
+      min-width: 84px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--line);
+    }
+
+    .status-chip strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .status-chip span {
+      display: block;
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .empty-state,
+    .finish-state {
+      padding: 28px;
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at top right, rgba(216, 140, 72, 0.14), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(252, 248, 241, 0.92) 100%);
+      border: 1px solid var(--line);
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .empty-state h2,
+    .finish-state h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 40px);
+    }
+
+    .empty-state p,
+    .finish-state p {
+      margin: 10px 0 0;
+      max-width: 660px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-wrap {
+      perspective: 1600px;
+      min-height: 500px;
+    }
+
+    .card-shell {
+      position: relative;
+      min-height: 500px;
+      border-radius: 34px;
+      background: transparent;
+      border: 0;
+      width: 100%;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    .card-shell:focus-visible,
+    .deck-item:focus-visible,
+    .ghost-btn:focus-visible,
+    .solid-btn:focus-visible,
+    .mini-btn:focus-visible,
+    .rating-btn:focus-visible {
+      outline: 3px solid rgba(46, 111, 149, 0.28);
+      outline-offset: 3px;
+    }
+
+    .card-3d {
+      position: relative;
+      width: 100%;
+      min-height: 500px;
+      transform-style: preserve-3d;
+      transition: transform 600ms ease-in-out;
+    }
+
+    .card-shell.is-flipped .card-3d {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: 34px;
+      padding: 26px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(251, 247, 239, 0.94) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      text-align: left;
+    }
+
+    .card-face.back {
+      transform: rotateY(180deg);
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(46, 111, 149, 0.1);
+      color: var(--brand-strong);
+      border: 1px solid rgba(46, 111, 149, 0.12);
+    }
+
+    .tag.alt {
+      background: rgba(216, 140, 72, 0.12);
+      color: #92520f;
+      border-color: rgba(216, 140, 72, 0.16);
+    }
+
+    .card-front-center {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      padding: 18px 0;
+    }
+
+    .word-display {
+      margin: 0;
+      font-size: clamp(48px, 7vw, 86px);
+      line-height: 0.94;
+      letter-spacing: 0.01em;
+      word-break: break-word;
+    }
+
+    .phonetic {
+      margin: 0;
+      font-size: 21px;
+      color: var(--muted);
+    }
+
+    .translation-hero {
+      margin: 0;
+      font-size: 18px;
+      color: var(--brand-strong);
+      font-weight: 700;
+    }
+
+    .front-note,
+    .back-note {
+      margin-top: auto;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .mini-btn {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      min-height: 40px;
+      padding: 0 14px;
+    }
+
+    .back-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .detail-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 15px;
+    }
+
+    .detail-card.full {
+      grid-column: 1 / -1;
+    }
+
+    .detail-card h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--brand-strong);
+    }
+
+    .detail-card p,
+    .detail-card li {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .detail-card ul,
+    .detail-card ol {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .detail-card li + li {
+      margin-top: 6px;
+    }
+
+    .example-entry + .example-entry {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(31, 41, 51, 0.12);
+    }
+
+    .example-en {
+      font-weight: 700;
+    }
+
+    .example-zh {
+      margin-top: 4px;
+      color: var(--muted);
+    }
+
+    .rating-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .rating-btn {
+      min-height: 74px;
+      border-radius: 20px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: 0.01em;
+      box-shadow: 0 16px 24px rgba(31, 41, 51, 0.12);
+    }
+
+    .rating-btn small {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.86;
+    }
+
+    .rating-btn.again { background: linear-gradient(180deg, #e97b79 0%, var(--again) 100%); }
+    .rating-btn.hard { background: linear-gradient(180deg, #eab05d 0%, var(--hard) 100%); }
+    .rating-btn.good { background: linear-gradient(180deg, #669ef0 0%, var(--good) 100%); }
+    .rating-btn.easy { background: linear-gradient(180deg, #78be7e 0%, var(--easy) 100%); }
+
+    .rating-btn:disabled,
+    .ghost-btn:disabled,
+    .solid-btn:disabled,
+    .mini-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .footer-note {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      min-width: 220px;
+      max-width: min(90vw, 520px);
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(24, 31, 38, 0.92);
+      color: #fff;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 60;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(18, 25, 31, 0.42);
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(720px, calc(100vw - 24px));
+      background: #fffdf8;
+      border-radius: 26px;
+      box-shadow: 0 30px 80px rgba(18, 25, 31, 0.28);
+      border: 1px solid rgba(31, 41, 51, 0.08);
+      padding: 22px;
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .modal p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .shortcut-grid,
+    .settings-grid,
+    .finish-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .shortcut-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shortcut-item {
+      padding: 14px 15px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .shortcut-item strong {
+      display: inline-block;
+      min-width: 74px;
+      color: var(--brand-strong);
+    }
+
+    .settings-grid,
+    .finish-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .select {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 0 14px;
+      color: var(--ink);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 46px;
+      padding: 0 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .toggle-row input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .masthead {
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .statusbar,
+      .back-grid,
+      .settings-grid,
+      .finish-grid,
+      .shortcut-grid,
+      .rating-grid,
+      .actions-grid,
+      .session-actions,
+      .badge-row {
+        grid-template-columns: 1fr;
+      }
+
+      .card-face {
+        padding: 18px;
+      }
+
+      .word-display {
+        font-size: clamp(40px, 12vw, 64px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <script id="flashcard-preload">window.__FLASHCARD_PRELOAD__ = null;</script>
+  <script>
+    (function () {
+      const STORAGE_KEY = "flashcard-demo-state-v1";
+      const MAX_IMPORT_WORDS = 2000;
+      const IMPORT_GROUP_SIZE = 100;
+      const APP_TITLE = "Flashcard SRS Demo";
+      const uiState = {
+        draftDeckTitle: "",
+        draftImportText: "",
+        settingsOpen: false,
+        helpOpen: false,
+        resetOpen: false
+      };
+      let toastTimer = null;
+      let speechTimer = null;
+
+      const BUILTIN_DECK = {
+        id: "builtin-core",
+        label: "Core Demo Deck",
+        source: "builtin",
+        description: "内置演示词卡，覆盖正反面内容、统计、SRS 队列和语音朗读。",
+        cards: [
+          {
+            id: "arrive",
+            word: "arrive",
+            pronunciation: "/əˈraɪv/",
+            partOfSpeech: "v.",
+            translation: "到达，抵达",
+            variations: ["arrival (n.) 到达", "arriving (adj.) 到达中的"],
+            collocations: ["arrive at the airport", "arrive in London", "arrive early"],
+            examples: [
+              { english: "We arrived at the hotel very late at night.", chinese: "我们深夜才到达酒店。" },
+              { english: "The train arrived on time this morning.", chinese: "今天早上火车准时到站。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "collect",
+            word: "collect",
+            pronunciation: "/kəˈlekt/",
+            partOfSpeech: "v.",
+            translation: "收集，领取",
+            variations: ["collection (n.) 收集", "collector (n.) 收藏者"],
+            collocations: ["collect stamps", "collect homework", "collect data"],
+            examples: [
+              { english: "The students collect leaves for the science project.", chinese: "学生们为科学项目收集树叶。" },
+              { english: "Please collect your bag before you leave.", chinese: "离开前请领取你的书包。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "curious",
+            word: "curious",
+            pronunciation: "/ˈkjʊriəs/",
+            partOfSpeech: "adj.",
+            translation: "好奇的",
+            variations: ["curiously (adv.) 好奇地", "curiosity (n.) 好奇心"],
+            collocations: ["be curious about", "a curious child", "curious eyes"],
+            examples: [
+              { english: "Mina is curious about how the robot works.", chinese: "Mina 对机器人如何运作很好奇。" },
+              { english: "A curious bird watched us from the tree.", chinese: "一只好奇的小鸟在树上看着我们。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "journey",
+            word: "journey",
+            pronunciation: "/ˈdʒɜːni/",
+            partOfSpeech: "n.",
+            translation: "旅程",
+            variations: ["journeying (v.) 旅行中"],
+            collocations: ["long journey", "safe journey", "begin a journey"],
+            examples: [
+              { english: "The family started their journey before sunrise.", chinese: "这家人在日出前开始了旅程。" },
+              { english: "Reading can be a journey into new ideas.", chinese: "阅读也可以是一场通往新想法的旅程。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "protect",
+            word: "protect",
+            pronunciation: "/prəˈtekt/",
+            partOfSpeech: "v.",
+            translation: "保护",
+            variations: ["protection (n.) 保护", "protective (adj.) 保护性的"],
+            collocations: ["protect the forest", "protect children", "sun protection"],
+            examples: [
+              { english: "Trees protect the soil from heavy rain.", chinese: "树木保护土壤不受暴雨冲刷。" },
+              { english: "A helmet protects your head when you ride.", chinese: "骑行时头盔能保护你的头部。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "ancient",
+            word: "ancient",
+            pronunciation: "/ˈeɪnʃənt/",
+            partOfSpeech: "adj.",
+            translation: "古老的",
+            variations: ["anciently (adv.) 古时地"],
+            collocations: ["ancient city", "ancient story", "ancient wall"],
+            examples: [
+              { english: "We visited an ancient town near the river.", chinese: "我们参观了河边一座古镇。" },
+              { english: "The museum keeps ancient tools and maps.", chinese: "博物馆保存着古老的工具和地图。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "solve",
+            word: "solve",
+            pronunciation: "/sɒlv/",
+            partOfSpeech: "v.",
+            translation: "解决，解答",
+            variations: ["solution (n.) 解决方案", "solvable (adj.) 可解决的"],
+            collocations: ["solve a puzzle", "solve a problem", "solve together"],
+            examples: [
+              { english: "The team worked together to solve the puzzle.", chinese: "团队一起解决了这个谜题。" },
+              { english: "Can you solve this math question by yourself?", chinese: "你能自己解出这道数学题吗？" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "brave",
+            word: "brave",
+            pronunciation: "/breɪv/",
+            partOfSpeech: "adj.",
+            translation: "勇敢的",
+            variations: ["bravely (adv.) 勇敢地", "bravery (n.) 勇气"],
+            collocations: ["brave decision", "brave face", "stay brave"],
+            examples: [
+              { english: "The brave firefighter entered the smoky room.", chinese: "勇敢的消防员进入了浓烟弥漫的房间。" },
+              { english: "You were brave to ask that question.", chinese: "你能提出那个问题很勇敢。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "improve",
+            word: "improve",
+            pronunciation: "/ɪmˈpruːv/",
+            partOfSpeech: "v.",
+            translation: "改进，提高",
+            variations: ["improvement (n.) 改善", "improving (adj.) 正在提升的"],
+            collocations: ["improve quickly", "improve skills", "improve health"],
+            examples: [
+              { english: "Practice every day to improve your speaking.", chinese: "每天练习可以提高你的口语。" },
+              { english: "The new plan will improve the learning experience.", chinese: "新方案会改善学习体验。" }
+            ],
+            source: "builtin"
+          },
+          {
+            id: "whisper",
+            word: "whisper",
+            pronunciation: "/ˈwɪspə(r)/",
+            partOfSpeech: "v./n.",
+            translation: "低声说；耳语",
+            variations: ["whispered (adj.) 低声说的"],
+            collocations: ["whisper softly", "in a whisper", "whisper a secret"],
+            examples: [
+              { english: "They whisper in the library so nobody is disturbed.", chinese: "他们在图书馆轻声说话，以免打扰别人。" },
+              { english: "The teacher heard a whisper behind the class.", chinese: "老师听到了教室后面传来的耳语。" }
+            ],
+            source: "builtin"
+          }
+        ]
+      };
+
+      const defaultState = {
+        selectedDeckId: BUILTIN_DECK.id,
+        customDecks: [],
+        lastImportSummary: null,
+        settings: {
+          speechRate: "1",
+          autoSpeak: true
+        },
+        reviewStates: {},
+        session: null
+      };
+
+      const appState = loadState();
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const base = raw ? JSON.parse(raw) : {};
+          const preload = window.__FLASHCARD_PRELOAD__ && typeof window.__FLASHCARD_PRELOAD__ === "object"
+            ? window.__FLASHCARD_PRELOAD__
+            : null;
+          return normalizeState(preload || base);
+        } catch (error) {
+          console.warn("Failed to load app state.", error);
+          return normalizeState({});
+        }
+      }
+
+      function normalizeState(input) {
+        const state = {
+          ...defaultState,
+          ...input,
+          settings: {
+            ...defaultState.settings,
+            ...(input.settings || {})
+          }
+        };
+
+        if (!Array.isArray(state.customDecks)) {
+          state.customDecks = [];
+        }
+
+        if (!state.reviewStates || typeof state.reviewStates !== "object") {
+          state.reviewStates = {};
+        }
+
+        if (!getDecks(state).some((deck) => deck.id === state.selectedDeckId)) {
+          state.selectedDeckId = BUILTIN_DECK.id;
+        }
+
+        if (state.session) {
+          state.session = normalizeSession(state.session);
+        }
+
+        return state;
+      }
+
+      function normalizeSession(session) {
+        if (!session || !Array.isArray(session.queue)) {
+          return null;
+        }
+
+        return {
+          deckId: session.deckId || BUILTIN_DECK.id,
+          deckLabel: session.deckLabel || BUILTIN_DECK.label,
+          mode: session.mode === "review" ? "review" : "study",
+          queue: session.queue.filter(Boolean),
+          total: Number(session.total || 0),
+          flipped: Boolean(session.flipped),
+          stats: {
+            again: Number(session.stats && session.stats.again || 0),
+            hard: Number(session.stats && session.stats.hard || 0),
+            good: Number(session.stats && session.stats.good || 0),
+            easy: Number(session.stats && session.stats.easy || 0)
+          },
+          completedIds: Array.isArray(session.completedIds) ? session.completedIds : [],
+          seenIds: Array.isArray(session.seenIds) ? session.seenIds : [],
+          startedAt: session.startedAt || new Date().toISOString(),
+          finishedAt: session.finishedAt || null
+        };
+      }
+
+      function persistState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      }
+
+      function getDecks(state = appState) {
+        return [BUILTIN_DECK].concat(state.customDecks || []);
+      }
+
+      function getSelectedDeck() {
+        return getDecks().find((deck) => deck.id === appState.selectedDeckId) || BUILTIN_DECK;
+      }
+
+      function getCardById(cardId) {
+        const decks = getDecks();
+        for (const deck of decks) {
+          const found = deck.cards.find((card) => card.id === cardId);
+          if (found) {
+            return found;
+          }
+        }
+        return null;
+      }
+
+      function getDeckStats(deck) {
+        const cards = deck.cards || [];
+        let mastered = 0;
+        let learning = 0;
+        let reviewable = 0;
+
+        cards.forEach((card) => {
+          const reviewState = appState.reviewStates[card.id];
+          if (!reviewState) {
+            learning += 1;
+            reviewable += 1;
+            return;
+          }
+          if (reviewState.status === "mastered") {
+            mastered += 1;
+          } else {
+            learning += 1;
+            reviewable += 1;
+          }
+        });
+
+        return {
+          total: cards.length,
+          mastered,
+          learning,
+          reviewable
+        };
+      }
+
+      function slugify(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("is-visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove("is-visible");
+        }, 2200);
+      }
+
+      function setModal(name, isOpen) {
+        if (name === "help") {
+          uiState.helpOpen = isOpen;
+        }
+        if (name === "settings") {
+          uiState.settingsOpen = isOpen;
+        }
+        if (name === "reset") {
+          uiState.resetOpen = isOpen;
+        }
+        render();
+      }
+
+      function createImportedCard(word, deckId, order) {
+        const normalized = word.toLowerCase();
+        const display = word.toLowerCase();
+        const capitalized = display.charAt(0).toUpperCase() + display.slice(1);
+        return {
+          id: deckId + "-" + slugify(display) + "-" + String(order + 1),
+          word: display,
+          pronunciation: "/" + display + "/",
+          partOfSpeech: "custom",
+          translation: "待补充释义",
+          variations: [capitalized + " (imported word)"],
+          collocations: ["learn " + display, "review " + display, "use " + display + " in a sentence"],
+          examples: [
+            { english: "I am learning the word " + display + " today.", chinese: "我今天正在学习单词 " + display + "。" },
+            { english: "Please write " + display + " in your notebook.", chinese: "请把 " + display + " 写进你的笔记本。" }
+          ],
+          source: "custom",
+          original: normalized
+        };
+      }
+
+      function importWords() {
+        const raw = uiState.draftImportText || "";
+        const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        if (!lines.length) {
+          showToast("先输入要导入的单词列表。");
+          return;
+        }
+        if (lines.length > MAX_IMPORT_WORDS) {
+          showToast("单次导入上限是 2000 个单词。");
+          return;
+        }
+
+        const seen = new Set();
+        const validWords = [];
+        const duplicates = [];
+        const invalid = [];
+
+        lines.forEach((line) => {
+          const canonical = line.toLowerCase();
+          if (!/^[A-Za-z]+$/.test(line)) {
+            invalid.push(line);
+            return;
+          }
+          if (seen.has(canonical)) {
+            duplicates.push(line);
+            return;
+          }
+          seen.add(canonical);
+          validWords.push(canonical);
+        });
+
+        if (!validWords.length) {
+          appState.lastImportSummary = {
+            imported: 0,
+            groups: 0,
+            duplicates,
+            invalid
+          };
+          persistState();
+          render();
+          showToast("没有可导入的有效单词。");
+          return;
+        }
+
+        const timestamp = new Date();
+        const stamp = timestamp.toISOString().replace(/[:.]/g, "-");
+        const baseTitle = uiState.draftDeckTitle.trim() || "Custom Import " + timestamp.toLocaleDateString("zh-CN");
+        const groups = [];
+
+        for (let i = 0; i < validWords.length; i += IMPORT_GROUP_SIZE) {
+          const chunk = validWords.slice(i, i + IMPORT_GROUP_SIZE);
+          const groupIndex = Math.floor(i / IMPORT_GROUP_SIZE) + 1;
+          const deckId = "custom-" + stamp + "-" + String(groupIndex);
+          const cards = chunk.map((word, order) => createImportedCard(word, deckId, order));
+          groups.push({
+            id: deckId,
+            label: baseTitle + " · Group " + groupIndex,
+            source: "custom",
+            createdAt: timestamp.toISOString(),
+            description: "用户导入词表，第 " + groupIndex + " 组，共 " + cards.length + " 个单词。",
+            cards: cards
+          });
+        }
+
+        appState.customDecks = groups.concat(appState.customDecks);
+        appState.selectedDeckId = groups[0].id;
+        appState.lastImportSummary = {
+          imported: validWords.length,
+          groups: groups.length,
+          duplicates,
+          invalid
+        };
+
+        uiState.draftDeckTitle = "";
+        uiState.draftImportText = "";
+        persistState();
+        render();
+        showToast("已导入 " + validWords.length + " 个单词，并自动分组。");
+      }
+
+      function chooseDeck(deckId) {
+        if (appState.session && appState.session.queue.length) {
+          const confirmed = window.confirm("切换卡组会保留当前会话，但新会话将基于新的卡组。继续切换吗？");
+          if (!confirmed) {
+            return;
+          }
+        }
+        appState.selectedDeckId = deckId;
+        persistState();
+        render();
+      }
+
+      function startSession(mode) {
+        const deck = getSelectedDeck();
+        const cards = deck.cards.slice();
+        if (!cards.length) {
+          showToast("当前卡组没有可学习的卡片。");
+          return;
+        }
+
+        let queue = cards.map((card) => card.id);
+        if (mode === "review") {
+          const due = queue.filter((cardId) => {
+            const reviewState = appState.reviewStates[cardId];
+            return !reviewState || reviewState.status !== "mastered";
+          });
+          queue = due.length ? due : queue;
+        }
+
+        appState.session = {
+          deckId: deck.id,
+          deckLabel: deck.label,
+          mode: mode,
+          queue: queue,
+          total: queue.length,
+          flipped: false,
+          stats: { again: 0, hard: 0, good: 0, easy: 0 },
+          completedIds: [],
+          seenIds: [],
+          startedAt: new Date().toISOString(),
+          finishedAt: null
+        };
+
+        persistState();
+        render();
+        scheduleSpeech();
+      }
+
+      function resetSession() {
+        appState.session = null;
+        persistState();
+        uiState.resetOpen = false;
+        render();
+        showToast("当前练习已重置。");
+      }
+
+      function flipCard() {
+        if (!appState.session || !appState.session.queue.length) {
+          return;
+        }
+        appState.session.flipped = !appState.session.flipped;
+        persistState();
+        render();
+        scheduleSpeech();
+      }
+
+      function getCurrentCard() {
+        if (!appState.session || !appState.session.queue.length) {
+          return null;
+        }
+        return getCardById(appState.session.queue[0]);
+      }
+
+      function updateReviewState(cardId, rating) {
+        const previous = appState.reviewStates[cardId] || {
+          status: "new",
+          reviewCount: 0,
+          lastRating: null,
+          lastReviewedAt: null
+        };
+
+        let nextStatus = "learning";
+        if (rating === "easy") {
+          nextStatus = "mastered";
+        } else if (rating === "good" || rating === "hard") {
+          nextStatus = "reviewing";
+        }
+
+        appState.reviewStates[cardId] = {
+          status: nextStatus,
+          reviewCount: Number(previous.reviewCount || 0) + 1,
+          lastRating: rating,
+          lastReviewedAt: new Date().toISOString()
+        };
+      }
+
+      function rateCurrentCard(rating) {
+        if (!appState.session || !appState.session.queue.length) {
+          return;
+        }
+
+        if (!appState.session.flipped) {
+          showToast("先翻到卡片背面，再进行评分。");
+          return;
+        }
+
+        const currentId = appState.session.queue.shift();
+        const remaining = appState.session.queue;
+        appState.session.stats[rating] += 1;
+        if (!appState.session.seenIds.includes(currentId)) {
+          appState.session.seenIds.push(currentId);
+        }
+
+        updateReviewState(currentId, rating);
+
+        if (rating === "again") {
+          const insertIndex = Math.min(1, remaining.length);
+          remaining.splice(insertIndex, 0, currentId);
+        } else if (rating === "hard") {
+          const insertIndex = Math.min(Math.max(1, Math.round(remaining.length / 2)), remaining.length);
+          remaining.splice(insertIndex, 0, currentId);
+        } else if (rating === "good") {
+          remaining.push(currentId);
+        } else if (rating === "easy") {
+          appState.session.completedIds.push(currentId);
+        }
+
+        appState.session.flipped = false;
+        if (!remaining.length) {
+          appState.session.finishedAt = new Date().toISOString();
+        }
+
+        persistState();
+        render();
+        if (remaining.length) {
+          scheduleSpeech();
+        } else {
+          speechSynthesis.cancel();
+          showToast("本轮练习已完成。");
+        }
+      }
+
+      function speakCurrent() {
+        const card = getCurrentCard();
+        if (!card || !("speechSynthesis" in window)) {
+          return;
+        }
+
+        speechSynthesis.cancel();
+        const session = appState.session;
+        const text = session && session.flipped
+          ? (card.examples[0] ? card.examples[0].english : card.word)
+          : card.word;
+
+        if (!text) {
+          return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = Number(appState.settings.speechRate || 1);
+        utterance.lang = "en-US";
+        speechSynthesis.speak(utterance);
+      }
+
+      function scheduleSpeech(force) {
+        if (!force && !appState.settings.autoSpeak) {
+          return;
+        }
+        clearTimeout(speechTimer);
+        speechTimer = setTimeout(speakCurrent, 120);
+      }
+
+      function exportStandaloneHtml() {
+        const serializedState = JSON.stringify(appState).replace(/</g, "\\u003c");
+        const preloadScript = '<script id="flashcard-preload">window.__FLASHCARD_PRELOAD__ = ' + serializedState + ';<\/script>';
+        const html = "<!doctype html>\n" + document.documentElement.outerHTML.replace(
+          /<script id="flashcard-preload">[\s\S]*?<\/script>/,
+          preloadScript
+        );
+        const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "flashcard-srs-demo.html";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast("已导出单文件 HTML。");
+      }
+
+      function getSessionProgress() {
+        if (!appState.session) {
+          return 0;
+        }
+        if (!appState.session.total) {
+          return 0;
+        }
+        return Math.round((appState.session.stats.easy / appState.session.total) * 100);
+      }
+
+      function renderDecks(selectedDeck) {
+        return getDecks().map((deck) => {
+          const stats = getDeckStats(deck);
+          const selectedClass = deck.id === selectedDeck.id ? " is-selected" : "";
+          return (
+            '<button class="deck-item' + selectedClass + '" data-action="choose-deck" data-deck-id="' + escapeAttribute(deck.id) + '">' +
+              '<span class="deck-dot"></span>' +
+              '<span class="deck-copy">' +
+                '<strong>' + escapeHtml(deck.label) + '</strong>' +
+                '<span>' + escapeHtml(deck.description || "No description") + '</span>' +
+                '<span>' + stats.total + ' cards · mastered ' + stats.mastered + ' · reviewable ' + stats.reviewable + '</span>' +
+              '</span>' +
+            '</button>'
+          );
+        }).join("");
+      }
+
+      function renderImportSummary() {
+        const summary = appState.lastImportSummary;
+        if (!summary) {
+          return "";
+        }
+
+        const duplicates = summary.duplicates.length ? summary.duplicates.slice(0, 6).join(", ") : "none";
+        const invalid = summary.invalid.length ? summary.invalid.slice(0, 6).join(", ") : "none";
+
+        return (
+          '<div class="summary-card">' +
+            '<strong>Last import result</strong>' +
+            '<span>Imported ' + summary.imported + ' words into ' + summary.groups + ' group(s).</span>' +
+            '<span>Duplicates: ' + escapeHtml(duplicates) + '</span>' +
+            '<span>Invalid: ' + escapeHtml(invalid) + '</span>' +
+          '</div>'
+        );
+      }
+
+      function renderWorkspace() {
+        const session = appState.session;
+        if (!session) {
+          return (
+            '<section class="empty-state">' +
+              '<h2>Start a deck and begin.</h2>' +
+              '<p>先在左侧选择卡组，然后点击 <strong>Start Study</strong> 或 <strong>Start Review</strong>。练习过程会自动保存在浏览器里，关闭页面后仍可继续。</p>' +
+            '</section>'
+          );
+        }
+
+        if (!session.queue.length) {
+          return renderFinishState(session);
+        }
+
+        const card = getCurrentCard();
+        if (!card) {
+          return (
+            '<section class="empty-state">' +
+              '<h2>Card data is missing.</h2>' +
+              '<p>当前会话里的卡片无法找到。你可以重置当前练习后重新开始。</p>' +
+            '</section>'
+          );
+        }
+
+        return (
+          '<section class="card-wrap">' +
+            '<button class="card-shell' + (session.flipped ? ' is-flipped' : '') + '" data-action="flip-card" aria-label="Flip card">' +
+              '<div class="card-3d">' +
+                renderFrontCard(card, session) +
+                renderBackCard(card, session) +
+              '</div>' +
+            '</button>' +
+          '</section>'
+        );
+      }
+
+      function renderFrontCard(card, session) {
+        return (
+          '<article class="card-face front">' +
+            '<div class="card-meta">' +
+              '<div class="card-tags">' +
+                '<span class="tag">' + escapeHtml(session.deckLabel) + '</span>' +
+                '<span class="tag alt">' + (session.mode === "review" ? "Review Mode" : "Study Mode") + '</span>' +
+              '</div>' +
+              '<button class="mini-btn" type="button" data-action="play-audio">Play audio</button>' +
+            '</div>' +
+            '<div class="card-front-center">' +
+              '<p class="translation-hero">' + escapeHtml(card.partOfSpeech) + '</p>' +
+              '<h2 class="word-display">' + escapeHtml(card.word) + '</h2>' +
+              '<p class="phonetic">' + escapeHtml(card.pronunciation || "/-/") + '</p>' +
+            '</div>' +
+            '<p class="front-note">Press <strong>Space</strong> or click the card to flip. Press <strong>Enter</strong> to play the pronunciation again.</p>' +
+          '</article>'
+        );
+      }
+
+      function renderBackCard(card, session) {
+        const examples = (card.examples || []).map((example) => {
+          return (
+            '<div class="example-entry">' +
+              '<div class="example-en">' + escapeHtml(example.english) + '</div>' +
+              '<div class="example-zh">' + escapeHtml(example.chinese) + '</div>' +
+            '</div>'
+          );
+        }).join("");
+
+        const collocations = (card.collocations || []).map((item) => '<li>' + escapeHtml(item) + '</li>').join("");
+        const variations = (card.variations || []).map((item) => '<li>' + escapeHtml(item) + '</li>').join("");
+
+        return (
+          '<article class="card-face back">' +
+            '<div class="card-meta">' +
+              '<div class="card-tags">' +
+                '<span class="tag">' + escapeHtml(card.word) + '</span>' +
+                '<span class="tag alt">' + escapeHtml(card.source) + '</span>' +
+              '</div>' +
+              '<button class="mini-btn" type="button" data-action="play-audio">Play example</button>' +
+            '</div>' +
+            '<div class="back-grid">' +
+              '<section class="detail-card">' +
+                '<h4>Meaning</h4>' +
+                '<p>' + escapeHtml(card.partOfSpeech) + ' ' + escapeHtml(card.translation) + '</p>' +
+                '<p class="back-note">' + escapeHtml(card.pronunciation || "/-/") + '</p>' +
+              '</section>' +
+              '<section class="detail-card">' +
+                '<h4>Variations</h4>' +
+                '<ul>' + (variations || "<li>No variations yet.</li>") + '</ul>' +
+              '</section>' +
+              '<section class="detail-card">' +
+                '<h4>Collocations</h4>' +
+                '<ul>' + (collocations || "<li>No collocations yet.</li>") + '</ul>' +
+              '</section>' +
+              '<section class="detail-card full">' +
+                '<h4>Examples</h4>' +
+                (examples || '<p>No examples yet.</p>') +
+              '</section>' +
+            '</div>' +
+            '<p class="back-note">Rate the card with <strong>1-4</strong>, or use the buttons below. <strong>Again</strong> requeues early, <strong>Easy</strong> removes it from this round.</p>' +
+          '</article>'
+        );
+      }
+
+      function renderFinishState(session) {
+        return (
+          '<section class="finish-state">' +
+            '<h2>Session complete.</h2>' +
+            '<p>本轮练习已经完成。你可以重新开始当前卡组，或者切换到其他导入分组继续学习。</p>' +
+            '<div class="finish-grid">' +
+              '<div class="stat-box"><strong>' + session.total + '</strong><span>Total cards</span></div>' +
+              '<div class="stat-box"><strong>' + session.stats.easy + '</strong><span>Marked Easy</span></div>' +
+              '<div class="stat-box"><strong>' + session.stats.again + '</strong><span>Again taps</span></div>' +
+              '<div class="stat-box"><strong>' + session.stats.good + '</strong><span>Good taps</span></div>' +
+            '</div>' +
+            '<div class="session-actions">' +
+              '<button class="solid-btn" type="button" data-action="restart-study">Restart Study</button>' +
+              '<button class="ghost-btn" type="button" data-action="restart-review">Restart Review</button>' +
+            '</div>' +
+          '</section>'
+        );
+      }
+
+      function render() {
+        const session = appState.session;
+        const selectedDeck = getSelectedDeck();
+        const progress = getSessionProgress();
+        const stats = session ? session.stats : { again: 0, hard: 0, good: 0, easy: 0 };
+        const remaining = session ? session.queue.length : 0;
+        const total = session ? session.total : selectedDeck.cards.length;
+        const deckStats = getDeckStats(selectedDeck);
+
+        document.getElementById("app").innerHTML =
+          '<div class="shell">' +
+            '<header class="masthead">' +
+              '<div class="brand">' +
+                '<div class="brand-mark" aria-hidden="true"></div>' +
+                '<div class="brand-copy">' +
+                  '<h1>' + APP_TITLE + '</h1>' +
+                  '<p>基于 Flashcard 规格文档实现的独立演示应用，包含卡片正反面、SRS 评分队列、快捷键、自定义词表导入、浏览器本地持久化，以及导出为单文件 HTML。</p>' +
+                '</div>' +
+              '</div>' +
+              '<div class="top-actions">' +
+                '<button class="ghost-btn" type="button" data-action="open-help">Help</button>' +
+                '<button class="ghost-btn" type="button" data-action="open-settings">Settings</button>' +
+                '<button class="solid-btn" type="button" data-action="export-html">Export HTML</button>' +
+              '</div>' +
+            '</header>' +
+            '<div class="layout">' +
+              '<aside class="panel sidebar">' +
+                '<section class="section">' +
+                  '<h2>Current deck</h2>' +
+                  '<p>选择一个卡组开始。内置卡组可直接演示全部功能，自定义导入会自动按每 100 个单词拆成独立分组。</p>' +
+                  '<div class="badge-row">' +
+                    '<div class="pill"><strong>' + selectedDeck.cards.length + '</strong><span>cards in selected deck</span></div>' +
+                    '<div class="pill"><strong>' + deckStats.mastered + '</strong><span>mastered overall</span></div>' +
+                  '</div>' +
+                  '<div class="deck-list">' + renderDecks(selectedDeck) + '</div>' +
+                '</section>' +
+                '<section class="section">' +
+                  '<h3>Import custom words</h3>' +
+                  '<p>每行一个英文单词，仅允许英文字母。重复词会自动去重，无效项会单独提示。</p>' +
+                  '<label class="field-label" for="deck-title">Deck title</label>' +
+                  '<input class="text-field" id="deck-title" type="text" value="' + escapeAttribute(uiState.draftDeckTitle) + '" placeholder="Optional custom deck title">' +
+                  '<label class="field-label" for="import-text">Word list</label>' +
+                  '<textarea class="textarea" id="import-text" placeholder="arrive&#10;collect&#10;protect">' + escapeHtml(uiState.draftImportText) + '</textarea>' +
+                  '<div class="actions-grid">' +
+                    '<button class="solid-btn" type="button" data-action="import-words">Import words</button>' +
+                    '<button class="ghost-btn" type="button" data-action="fill-sample">Fill sample</button>' +
+                  '</div>' +
+                  '<div class="hint">单次导入上限 ' + MAX_IMPORT_WORDS + ' 个词。导入后自动按每组 ' + IMPORT_GROUP_SIZE + ' 个词拆分卡组。</div>' +
+                  (renderImportSummary() ? '<div style="margin-top:12px;">' + renderImportSummary() + '</div>' : '') +
+                '</section>' +
+                '<section class="section">' +
+                  '<h3>Session controls</h3>' +
+                  '<p>Study 会按当前卡组顺序开始新一轮；Review 会优先抽取尚未标记为 mastered 的卡片。</p>' +
+                  '<div class="session-actions">' +
+                    '<button class="solid-btn" type="button" data-action="start-study">Start Study</button>' +
+                    '<button class="ghost-btn" type="button" data-action="start-review">Start Review</button>' +
+                  '</div>' +
+                  '<div class="session-actions">' +
+                    '<button class="ghost-btn" type="button" data-action="resume-session"' + (!session ? ' disabled' : '') + '>Resume session</button>' +
+                    '<button class="ghost-btn" type="button" data-action="open-reset"' + (!session ? ' disabled' : '') + '>Reset session</button>' +
+                  '</div>' +
+                '</section>' +
+              '</aside>' +
+              '<main class="panel workspace">' +
+                '<section class="statusbar">' +
+                  '<div class="progress-cluster">' +
+                    '<div class="progress-rail"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+                    '<strong>' + remaining + '/' + total + '</strong>' +
+                  '</div>' +
+                  '<div class="status-chip-row">' +
+                    '<div class="status-chip"><strong>' + stats.again + '</strong><span>Again</span></div>' +
+                    '<div class="status-chip"><strong>' + stats.hard + '</strong><span>Hard</span></div>' +
+                    '<div class="status-chip"><strong>' + stats.good + '</strong><span>Good</span></div>' +
+                    '<div class="status-chip"><strong>' + stats.easy + '</strong><span>Easy</span></div>' +
+                  '</div>' +
+                '</section>' +
+                '<section class="stage">' +
+                  renderWorkspace() +
+                  '<div class="rating-grid">' +
+                    '<button class="rating-btn again" type="button" data-action="rate" data-rating="again"' + (!session || !session.queue.length ? ' disabled' : '') + '>Again<small>key 1</small></button>' +
+                    '<button class="rating-btn hard" type="button" data-action="rate" data-rating="hard"' + (!session || !session.queue.length ? ' disabled' : '') + '>Hard<small>key 2</small></button>' +
+                    '<button class="rating-btn good" type="button" data-action="rate" data-rating="good"' + (!session || !session.queue.length ? ' disabled' : '') + '>Good<small>key 3</small></button>' +
+                    '<button class="rating-btn easy" type="button" data-action="rate" data-rating="easy"' + (!session || !session.queue.length ? ' disabled' : '') + '>Easy<small>key 4</small></button>' +
+                  '</div>' +
+                  '<div class="footer-note">Shortcuts: Space flip, Enter replay audio, 1-4 score, H or ? help, M settings, R reset current session.</div>' +
+                '</section>' +
+              '</main>' +
+            '</div>' +
+          '</div>' +
+          renderHelpModal() +
+          renderSettingsModal() +
+          renderResetModal();
+
+        bindEvents();
+      }
+
+      function renderHelpModal() {
+        return (
+          '<div class="modal-backdrop' + (uiState.helpOpen ? ' is-open' : '') + '" data-action="close-help-backdrop">' +
+            '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title">' +
+              '<h3 id="help-title">Keyboard shortcuts</h3>' +
+              '<p>这套快捷键对应需求文档中的高频练习场景，适合快速刷卡和课堂演示。</p>' +
+              '<div class="shortcut-grid">' +
+                renderShortcut("Space", "Flip the current card") +
+                renderShortcut("1", "Again: requeue near the front") +
+                renderShortcut("2", "Hard: insert near the middle") +
+                renderShortcut("3", "Good: move to the end") +
+                renderShortcut("4", "Easy: remove from this round") +
+                renderShortcut("Enter", "Replay word or example audio") +
+                renderShortcut("H / ?", "Open this help panel") +
+                renderShortcut("M", "Open settings") +
+              '</div>' +
+              '<div class="modal-actions">' +
+                '<button class="solid-btn" type="button" data-action="close-help">Close</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderShortcut(key, text) {
+        return '<div class="shortcut-item"><strong>' + escapeHtml(key) + '</strong><span>' + escapeHtml(text) + '</span></div>';
+      }
+
+      function renderSettingsModal() {
+        return (
+          '<div class="modal-backdrop' + (uiState.settingsOpen ? ' is-open' : '') + '" data-action="close-settings-backdrop">' +
+            '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">' +
+              '<h3 id="settings-title">Settings</h3>' +
+              '<p>当前版本使用浏览器的语音合成作为朗读能力，没有依赖外部 MP3 文件，因此本地和导出的单文件 HTML 都能直接运行。</p>' +
+              '<div class="settings-grid">' +
+                '<div>' +
+                  '<label class="field-label" for="speech-rate">Speech rate</label>' +
+                  '<select class="select" id="speech-rate">' +
+                    renderRateOption("0.75") +
+                    renderRateOption("1") +
+                    renderRateOption("1.25") +
+                    renderRateOption("1.5") +
+                  '</select>' +
+                '</div>' +
+                '<div>' +
+                  '<label class="field-label" for="auto-speak-toggle">Auto speak</label>' +
+                  '<div class="toggle-row">' +
+                    '<span>Speak automatically after card change</span>' +
+                    '<input id="auto-speak-toggle" type="checkbox"' + (appState.settings.autoSpeak ? ' checked' : '') + '>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="modal-actions">' +
+                '<button class="ghost-btn" type="button" data-action="close-settings">Cancel</button>' +
+                '<button class="solid-btn" type="button" data-action="save-settings">Save</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderRateOption(value) {
+        const selected = String(appState.settings.speechRate) === String(value) ? ' selected' : '';
+        return '<option value="' + value + '"' + selected + '>' + value + 'x</option>';
+      }
+
+      function renderResetModal() {
+        return (
+          '<div class="modal-backdrop' + (uiState.resetOpen ? ' is-open' : '') + '" data-action="close-reset-backdrop">' +
+            '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="reset-title">' +
+              '<h3 id="reset-title">Reset current session?</h3>' +
+              '<p>这会清除当前队列进度，但不会删除你导入的卡组，也不会清空每张卡的总体练习状态。</p>' +
+              '<div class="modal-actions">' +
+                '<button class="ghost-btn" type="button" data-action="close-reset">Cancel</button>' +
+                '<button class="solid-btn" type="button" data-action="confirm-reset">Reset</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function saveSettingsFromForm() {
+        const rateField = document.getElementById("speech-rate");
+        const autoSpeakField = document.getElementById("auto-speak-toggle");
+        appState.settings.speechRate = rateField ? rateField.value : "1";
+        appState.settings.autoSpeak = Boolean(autoSpeakField && autoSpeakField.checked);
+        persistState();
+        uiState.settingsOpen = false;
+        render();
+        scheduleSpeech(true);
+      }
+
+      function bindEvents() {
+        document.querySelectorAll("[data-action]").forEach((element) => {
+          element.addEventListener("click", handleActionClick);
+        });
+
+        const deckTitleField = document.getElementById("deck-title");
+        if (deckTitleField) {
+          deckTitleField.addEventListener("input", function (event) {
+            uiState.draftDeckTitle = event.target.value;
+          });
+        }
+
+        const importField = document.getElementById("import-text");
+        if (importField) {
+          importField.addEventListener("input", function (event) {
+            uiState.draftImportText = event.target.value;
+          });
+        }
+      }
+
+      function handleActionClick(event) {
+        const actionTarget = event.currentTarget;
+        const action = actionTarget.getAttribute("data-action");
+
+        if (action === "choose-deck") {
+          chooseDeck(actionTarget.getAttribute("data-deck-id"));
+          return;
+        }
+        if (action === "import-words") {
+          importWords();
+          return;
+        }
+        if (action === "fill-sample") {
+          uiState.draftDeckTitle = "Sample imported deck";
+          uiState.draftImportText = "planet\nforest\nbridge\ncareful\nsignal\ncorner";
+          render();
+          return;
+        }
+        if (action === "start-study") {
+          startSession("study");
+          return;
+        }
+        if (action === "start-review") {
+          startSession("review");
+          return;
+        }
+        if (action === "resume-session") {
+          if (appState.session) {
+            render();
+            scheduleSpeech();
+          }
+          return;
+        }
+        if (action === "open-help") {
+          setModal("help", true);
+          return;
+        }
+        if (action === "close-help" || action === "close-help-backdrop") {
+          if (action === "close-help-backdrop" && event.target !== event.currentTarget) {
+            return;
+          }
+          setModal("help", false);
+          return;
+        }
+        if (action === "open-settings") {
+          setModal("settings", true);
+          return;
+        }
+        if (action === "close-settings" || action === "close-settings-backdrop") {
+          if (action === "close-settings-backdrop" && event.target !== event.currentTarget) {
+            return;
+          }
+          setModal("settings", false);
+          return;
+        }
+        if (action === "save-settings") {
+          saveSettingsFromForm();
+          return;
+        }
+        if (action === "flip-card") {
+          flipCard();
+          return;
+        }
+        if (action === "play-audio") {
+          scheduleSpeech(true);
+          return;
+        }
+        if (action === "rate") {
+          rateCurrentCard(actionTarget.getAttribute("data-rating"));
+          return;
+        }
+        if (action === "open-reset") {
+          setModal("reset", true);
+          return;
+        }
+        if (action === "close-reset" || action === "close-reset-backdrop") {
+          if (action === "close-reset-backdrop" && event.target !== event.currentTarget) {
+            return;
+          }
+          setModal("reset", false);
+          return;
+        }
+        if (action === "confirm-reset") {
+          resetSession();
+          return;
+        }
+        if (action === "restart-study") {
+          startSession("study");
+          return;
+        }
+        if (action === "restart-review") {
+          startSession("review");
+          return;
+        }
+        if (action === "export-html") {
+          exportStandaloneHtml();
+        }
+      }
+
+      function handleKeyboard(event) {
+        const target = event.target;
+        const tagName = target && target.tagName ? target.tagName.toLowerCase() : "";
+        const isFormField = tagName === "input" || tagName === "textarea" || tagName === "select";
+
+        if (event.key === "Escape") {
+          if (uiState.helpOpen) {
+            setModal("help", false);
+          } else if (uiState.settingsOpen) {
+            setModal("settings", false);
+          } else if (uiState.resetOpen) {
+            setModal("reset", false);
+          }
+          return;
+        }
+
+        if (isFormField) {
+          return;
+        }
+
+        if (event.key === " " && appState.session && appState.session.queue.length) {
+          event.preventDefault();
+          flipCard();
+          return;
+        }
+
+        if (event.key === "Enter" && appState.session && appState.session.queue.length) {
+          event.preventDefault();
+          scheduleSpeech(true);
+          return;
+        }
+
+        if (event.key === "1") {
+          rateCurrentCard("again");
+          return;
+        }
+        if (event.key === "2") {
+          rateCurrentCard("hard");
+          return;
+        }
+        if (event.key === "3") {
+          rateCurrentCard("good");
+          return;
+        }
+        if (event.key === "4") {
+          rateCurrentCard("easy");
+          return;
+        }
+        if (event.key === "h" || event.key === "H" || event.key === "?") {
+          event.preventDefault();
+          setModal("help", true);
+          return;
+        }
+        if (event.key === "m" || event.key === "M") {
+          event.preventDefault();
+          setModal("settings", true);
+          return;
+        }
+        if (event.key === "r" || event.key === "R") {
+          event.preventDefault();
+          if (appState.session) {
+            setModal("reset", true);
+          }
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function escapeAttribute(value) {
+        return escapeHtml(value).replace(/"/g, "&quot;");
+      }
+
+      document.addEventListener("keydown", handleKeyboard);
+      render();
+
+      if (appState.session && appState.session.queue.length) {
+        scheduleSpeech();
+      }
+    })();
+  </script>
+</body>
+</html>

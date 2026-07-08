@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smith Demo Index</title>
+  <meta name="description" content="Demo index for the Smith repository.">
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --paper: rgba(255, 251, 243, 0.92);
+      --ink: #1f2933;
+      --muted: #67737d;
+      --line: rgba(31, 41, 51, 0.12);
+      --brand: #285d7c;
+      --accent: #d88945;
+      --leaf: #5a9a61;
+      --shadow: 0 24px 60px rgba(31, 41, 51, 0.14);
+      --radius: 28px;
+      --radius-sm: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      font-family: "Avenir Next", "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(216, 137, 69, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(40, 93, 124, 0.16), transparent 24%),
+        radial-gradient(circle at bottom center, rgba(90, 154, 97, 0.14), transparent 30%),
+        linear-gradient(180deg, #fff8ee 0%, #f6f1e8 55%, #ece7de 100%);
+      padding: 24px;
+    }
+
+    .shell {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+    }
+
+    .hero,
+    .card {
+      background: var(--paper);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 0.96;
+    }
+
+    .hero p {
+      margin: 12px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 17px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(40, 93, 124, 0.1);
+      color: var(--brand);
+    }
+
+    .eyebrow.flashcard {
+      background: rgba(216, 137, 69, 0.14);
+      color: #9a581a;
+    }
+
+    .card h2 {
+      margin: 16px 0 10px;
+      font-size: 30px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      min-height: 100px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+    }
+
+    .btn.primary {
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 18px 30px rgba(40, 93, 124, 0.22);
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn.accent {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 18px 30px rgba(216, 137, 69, 0.22);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .footer {
+      margin-top: 18px;
+      padding: 18px 22px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    code {
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.94em;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>Smith Demo Index</h1>
+      <p>这个 Pages 站点同时承载两个独立演示：一个是 WordSprout 小学生英语单词学习原型，另一个是基于 SRS 队列的 Flashcard 学习卡应用。进入各自路径即可直接体验。</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <span class="eyebrow">Wordsprout</span>
+        <h2>WordSprout Demo</h2>
+        <p>面向小学生英语单词学习的可视化流程原型，包含教材选择、今日任务、学习流程、复习入口、完成页和家长页等演示界面。</p>
+        <div class="actions">
+          <a class="btn primary" href="./wordsprout/">Open Demo</a>
+          <a class="btn secondary" href="https://github.com/bizika0811/smith">View Repository</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="eyebrow flashcard">Flashcard</span>
+        <h2>Flashcard SRS Demo</h2>
+        <p>独立的学习卡单页应用，支持正反面翻卡、Again/Hard/Good/Easy 调度、快捷键、自定义词表导入、本地进度保存和单文件 HTML 导出。</p>
+        <div class="actions">
+          <a class="btn accent" href="./flashcard/">Open Demo</a>
+          <a class="btn secondary" href="https://github.com/bizika0811/smith/tree/main/flashcard-demo">View Source</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="footer">
+      GitHub Pages 根地址预计为 <code>https://bizika0811.github.io/smith/</code>。<br>
+      子路径分别是 <code>/wordsprout/</code> 和 <code>/flashcard/</code>。
+    </section>
+  </main>
+</body>
+</html>

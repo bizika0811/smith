@@ -30,7 +30,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p site
-          cp -R WordSprout-demo/. site/
+          cp pages-index.html site/index.html
+          mkdir -p site/wordsprout
+          mkdir -p site/flashcard
+          cp -R WordSprout-demo/. site/wordsprout/
+          cp -R flashcard-demo/. site/flashcard/
           touch site/.nojekyll
 
       - name: Upload Pages artifact

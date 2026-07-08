@@ -1,0 +1,9 @@
+{
+  "name": "wordsprout-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static WordSprout visual demo",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
